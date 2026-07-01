@@ -1,3 +1,63 @@
-.title {
-  font-size: 1.6rem;
+.header {
+  width: min(100%, 1180px);
+  min-width: 0;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-top: 0.5rem;
+}
+
+.logo {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--green);
+  border-radius: var(--radius-sm);
+  color: var(--green);
+  font-weight: 700;
+  box-shadow: 0 0 24px rgba(76, 255, 155, 0.12);
+}
+
+.header div:last-child {
+  min-width: 0;
+}
+
+.header p {
+  margin: 0 0 0.25rem;
+  color: var(--cyan);
+  font-size: 0.8rem;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.45rem, 5.5vw, 2.4rem);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+  .header {
+    gap: 0.65rem;
+    padding-top: 0.35rem;
+  }
+
+  .logo {
+    width: 44px;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .header p {
+    font-size: 0.74rem;
+  }
+
+  .header h1 {
+    font-size: 1.38rem;
+  }
 }

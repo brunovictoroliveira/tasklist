@@ -12,7 +12,7 @@
   width: min(100%, 420px);
   max-height: calc(100vh - 2rem);
   overflow: auto;
-  border: 1px solid var(--cyan);
+  border: 1px solid var(--green);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -26,7 +26,7 @@
 }
 
 .header span {
-  color: var(--cyan);
+  color: var(--green);
   font-size: 0.78rem;
   text-transform: uppercase;
 }
@@ -38,7 +38,8 @@
   overflow-wrap: anywhere;
 }
 
-.form label {
+.form label,
+.colors legend {
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -51,6 +52,32 @@
   background: var(--bg-deep);
   color: var(--text);
   padding: 0 0.75rem;
+}
+
+.colors {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
 }
 
 .buttons {
@@ -86,5 +113,10 @@
 
   .form input {
     min-height: 38px;
+  }
+
+  .swatch {
+    width: 30px;
+    height: 30px;
   }
 }

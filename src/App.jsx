@@ -1,59 +1,134 @@
 import styles from "./App.module.css";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { arrayMove } from "@dnd-kit/sortable";
 import api from "./api/api";
 
 import Header from "./components/Header";
 import TaskList from "./components/TaskList";
 import Button from "./components/Button";
-import AddTaskForm from "./components/AddTaskForm";
+import ProjectForm from "./components/ProjectForm";
+
+const sortByPosition = (items) =>
+  [...items].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+const getNextId = (items) =>
+  String(items.length > 0 ? Math.max(...items.map((item) => Number(item.id))) + 1 : 1);
 
 function App() {
+  const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedProjects, setExpandedProjects] = useState({});
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get("/tasks");
-        setTasks(response.data);
+        const [projectsResponse, tasksResponse] = await Promise.all([
+          api.get("/projects"),
+          api.get("/tasks"),
+        ]);
+
+        setProjects(sortByPosition(projectsResponse.data));
+        setTasks(sortByPosition(tasksResponse.data));
       } catch (error) {
-        console.error("Erro ao buscar tarefas:", error);
+        console.error("Erro ao buscar dados:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchData();
   }, []);
+
+  const projectsWithTaskCount = useMemo(
+    () =>
+      sortByPosition(projects).map((project) => ({
+        ...project,
+        taskCount: tasks.filter((task) => task.projectId === project.id).length,
+      })),
+    [projects, tasks]
+  );
+
+  const persistTaskOrder = useCallback(async (orderedTasks) => {
+    const normalizedTasks = orderedTasks.map((task, index) => ({
+      ...task,
+      position: index + 1,
+    }));
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => {
+        const updatedTask = normalizedTasks.find((item) => item.id === task.id);
+        return updatedTask ?? task;
+      })
+    );
+
+    await Promise.all(
+      normalizedTasks.map((task) => api.put(`/tasks/${task.id}`, task))
+    );
+  }, []);
+
+  const addProject = useCallback(
+    async (newProject) => {
+      try {
+        const isDuplicate = projects.some(
+          (project) => project.name.toLowerCase() === newProject.name.toLowerCase()
+        );
+
+        if (isDuplicate) {
+          alert("Já existe um projeto com este nome.");
+          return false;
+        }
+
+        const project = {
+          ...newProject,
+          id: getNextId(projects),
+          position:
+            projects.length > 0
+              ? Math.max(...projects.map((project) => project.position ?? 0)) + 1
+              : 1,
+        };
+
+        const response = await api.post("/projects", project);
+        setProjects((currentProjects) => sortByPosition([...currentProjects, response.data]));
+        return true;
+      } catch (error) {
+        console.error("Erro ao adicionar projeto:", error);
+        return false;
+      }
+    },
+    [projects]
+  );
 
   const addTask = useCallback(
     async (newTask) => {
       try {
-        const isDuplicate = tasks.some(
+        const projectTasks = tasks.filter((task) => task.projectId === newTask.projectId);
+        const isDuplicate = projectTasks.some(
           (task) => task.title.toLowerCase() === newTask.title.toLowerCase()
         );
 
         if (isDuplicate) {
-          alert("Já existe uma tarefa com este nome.");
-          return;
+          alert("Já existe uma task com este nome neste projeto.");
+          return false;
         }
 
-        const maxPosition =
-          tasks.length > 0
-            ? Math.max(...tasks.map((task) => task.position))
-            : 0;
-
-        newTask = {
+        const task = {
           ...newTask,
-          id: String(
-            tasks.length > 0 ? Math.max(...tasks.map((task) => task.id)) + 1 : 1
-          ),
-          position: maxPosition + 1,
+          id: getNextId(tasks),
+          position:
+            projectTasks.length > 0
+              ? Math.max(...projectTasks.map((task) => task.position ?? 0)) + 1
+              : 1,
         };
 
-        const response = await api.post("/tasks", newTask);
-        setTasks((prevTasks) => [...prevTasks, response.data]);
+        const response = await api.post("/tasks", task);
+        setTasks((currentTasks) => sortByPosition([...currentTasks, response.data]));
+        return true;
       } catch (error) {
-        console.error("Erro ao adicionar tarefa:", error);
+        console.error("Erro ao adicionar task:", error);
+        return false;
       }
     },
     [tasks]
@@ -64,23 +139,24 @@ function App() {
       try {
         const isDuplicate = tasks.some(
           (task) =>
+            task.projectId === updatedTask.projectId &&
             task.id !== updatedTask.id &&
             task.title.toLowerCase() === updatedTask.title.toLowerCase()
         );
 
         if (isDuplicate) {
-          alert("Já existe uma tarefa com este nome.");
-          return;
+          alert("Já existe uma task com este nome neste projeto.");
+          return false;
         }
 
         const response = await api.put(`/tasks/${updatedTask.id}`, updatedTask);
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === response.data.id ? response.data : task
-          )
+        setTasks((currentTasks) =>
+          currentTasks.map((task) => (task.id === response.data.id ? response.data : task))
         );
+        return true;
       } catch (error) {
-        console.error("Erro ao atualizar tarefa:", error);
+        console.error("Erro ao atualizar task:", error);
+        return false;
       }
     },
     [tasks]
@@ -94,120 +170,119 @@ function App() {
 
         await api.delete(`/tasks/${taskId}`);
 
-        setTasks((prevTasks) => {
-          const updatedTasks = prevTasks
+        const remainingProjectTasks = sortByPosition(
+          tasks.filter(
+            (task) => task.projectId === taskToDelete.projectId && task.id !== taskId
+          )
+        );
+
+        const normalizedTasks = remainingProjectTasks.map((task, index) => ({
+          ...task,
+          position: index + 1,
+        }));
+
+        setTasks((currentTasks) =>
+          currentTasks
             .filter((task) => task.id !== taskId)
-            .map((task, index) => ({
-              ...task,
-              position: index + 1,
-            }));
+            .map((task) => {
+              const updatedTask = normalizedTasks.find((item) => item.id === task.id);
+              return updatedTask ?? task;
+            })
+        );
 
-          updatedTasks.forEach(async (task) => {
-            await api.put(`/tasks/${task.id}`, {
-              ...task,
-              position: task.position,
-            });
-          });
-
-          return updatedTasks;
-        });
+        await Promise.all(
+          normalizedTasks.map((task) => api.put(`/tasks/${task.id}`, task))
+        );
       } catch (error) {
-        console.error("Erro ao excluir tarefa:", error);
+        console.error("Erro ao excluir task:", error);
       }
     },
     [tasks]
   );
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
+  const reorderTasks = useCallback(
+    async (projectId, activeTaskId, overTaskId) => {
+      if (!overTaskId || activeTaskId === overTaskId) return;
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+      const projectTasks = sortByPosition(tasks.filter((task) => task.projectId === projectId));
+      const oldIndex = projectTasks.findIndex((task) => task.id === activeTaskId);
+      const newIndex = projectTasks.findIndex((task) => task.id === overTaskId);
 
-  const moveTaskUp = async (taskId) => {
-    try {
-      const taskIndex = tasks.findIndex((task) => task.id === taskId);
-      if (taskIndex === -1 || tasks[taskIndex].position === 1) return;
+      if (oldIndex === -1 || newIndex === -1) return;
 
-      const tasksCopy = [...tasks];
-      const taskToMoveUp = tasksCopy[taskIndex];
-      const taskToMoveDown = tasksCopy[taskIndex - 1];
+      await persistTaskOrder(arrayMove(projectTasks, oldIndex, newIndex));
+    },
+    [persistTaskOrder, tasks]
+  );
 
-      const oldPosition = taskToMoveUp.position;
-      taskToMoveUp.position = taskToMoveDown.position;
-      taskToMoveDown.position = oldPosition;
+  const moveTaskUp = useCallback(
+    async (projectId, taskId) => {
+      const projectTasks = sortByPosition(tasks.filter((task) => task.projectId === projectId));
+      const taskIndex = projectTasks.findIndex((task) => task.id === taskId);
+      if (taskIndex <= 0) return;
 
-      const updatedTasks = tasksCopy
-        .slice()
-        .sort((a, b) => a.position - b.position);
+      await persistTaskOrder(arrayMove(projectTasks, taskIndex, taskIndex - 1));
+    },
+    [persistTaskOrder, tasks]
+  );
 
-      await Promise.all(
-        updatedTasks.map(async (task) => {
-          await api.put(`/tasks/${task.id}`, {
-            ...task,
-            position: task.position,
-          });
-        })
-      );
+  const moveTaskDown = useCallback(
+    async (projectId, taskId) => {
+      const projectTasks = sortByPosition(tasks.filter((task) => task.projectId === projectId));
+      const taskIndex = projectTasks.findIndex((task) => task.id === taskId);
+      if (taskIndex === -1 || taskIndex >= projectTasks.length - 1) return;
 
-      setTasks(updatedTasks);
-    } catch (error) {
-      console.error("Erro ao mover tarefa para cima:", error);
-    }
-  };
+      await persistTaskOrder(arrayMove(projectTasks, taskIndex, taskIndex + 1));
+    },
+    [persistTaskOrder, tasks]
+  );
 
-  const moveTaskDown = async (taskId) => {
-    try {
-      const taskIndex = tasks.findIndex((task) => task.id === taskId);
-      if (taskIndex === -1 || taskIndex === tasks.length - 1) return;
-
-      const tasksCopy = [...tasks];
-      const taskToMoveDown = tasksCopy[taskIndex];
-      const taskToMoveUp = tasksCopy[taskIndex + 1];
-
-      const oldPosition = taskToMoveDown.position;
-      taskToMoveDown.position = taskToMoveUp.position;
-      taskToMoveUp.position = oldPosition;
-
-      const updatedTasks = tasksCopy
-        .slice()
-        .sort((a, b) => a.position - b.position);
-
-      await Promise.all(
-        updatedTasks.map(async (task) => {
-          await api.put(`/tasks/${task.id}`, {
-            ...task,
-            position: task.position,
-          });
-        })
-      );
-
-      setTasks(updatedTasks);
-    } catch (error) {
-      console.error("Erro ao mover tarefa para baixo:", error);
-    }
+  const toggleProject = (projectId) => {
+    setExpandedProjects((currentState) => ({
+      ...currentState,
+      [projectId]: !currentState[projectId],
+    }));
   };
 
   return (
-    <div className={styles.container}>
+    <main className={styles.container}>
       <Header />
+
+      <section className={styles.toolbar} aria-label="Ações do board">
+        <div>
+          <p className={styles.kicker}>Projetos ativos</p>
+          <span className={styles.counter}>
+            {projects.length} projetos · {tasks.length} tasks
+          </span>
+        </div>
+        <Button name="Novo projeto" type="submit" onClick={() => setIsProjectModalOpen(true)} />
+      </section>
+
       <TaskList
+        projects={projectsWithTaskCount}
         tasks={tasks}
+        expandedProjects={expandedProjects}
+        isLoading={isLoading}
+        addTask={addTask}
         updateTask={updateTask}
         deleteTask={deleteTask}
         moveTaskUp={moveTaskUp}
         moveTaskDown={moveTaskDown}
+        reorderTasks={reorderTasks}
+        toggleProject={toggleProject}
       />
-      <Button name="ADICIONAR" type="submit" onClick={openModal} />
-      <AddTaskForm
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        addTask={addTask}
+
+      <ProjectForm
+        isOpen={isProjectModalOpen}
+        onRequestClose={() => setIsProjectModalOpen(false)}
+        addProject={addProject}
       />
-    </div>
+    </main>
   );
 }
 
 export default App;
+
+
+
+

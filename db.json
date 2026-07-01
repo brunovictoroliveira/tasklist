@@ -1,53 +1,68 @@
 {
+  "projects": [
+    {
+      "id": "1",
+      "name": "Projeto padrão",
+      "color": "#00e5ff",
+      "position": 1
+    }
+  ],
   "tasks": [
     {
       "id": "1",
       "title": "logan",
       "cost": 100,
       "dueDate": "2024-11-30",
-      "position": 1
+      "position": 1,
+      "projectId": "1"
     },
     {
       "id": "2",
       "title": "palio",
       "cost": 9000,
       "dueDate": "2024-11-30",
-      "position": 2
+      "position": 2,
+      "projectId": "1"
     },
     {
       "id": "3",
       "title": "idea",
       "cost": 400,
       "dueDate": "2024-11-30",
-      "position": 3
+      "position": 3,
+      "projectId": "1"
     },
     {
       "id": "4",
       "title": "livina",
       "cost": 30000,
       "dueDate": "2024-11-30",
-      "position": 4
+      "position": 4,
+      "projectId": "1"
     },
     {
       "id": "5",
       "title": "rx7",
       "cost": 777,
       "dueDate": "2024-11-30",
-      "position": 5
+      "position": 5,
+      "projectId": "1"
     },
     {
       "id": "6",
       "title": "skyline",
       "cost": 60000,
       "dueDate": "2024-11-30",
-      "position": 6
+      "position": 6,
+      "projectId": "1"
     },
     {
       "id": "7",
       "title": "mclaren",
       "cost": 3000000,
       "dueDate": "2024-11-30",
-      "position": 7
+      "position": 7,
+      "projectId": "1"
     }
   ]
 }

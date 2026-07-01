@@ -1,8 +1,9 @@
 import styles from "../styles/EditTaskForm.module.css";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import PropTypes from "prop-types";
+
 import Button from "./Button";
 
 Modal.setAppElement("#root");
@@ -20,71 +21,66 @@ const EditTaskForm = ({ isOpen, onRequestClose, updateTask, task }) => {
     }
   }, [task]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    const updatedTask = {
+    const wasUpdated = await updateTask({
       ...task,
-      title,
-      cost: parseFloat(cost),
+      title: title.trim(),
+      cost: Math.round(parseFloat(cost) * 100) / 100,
       dueDate,
-    };
+    });
 
-    updateTask(updatedTask);
-    onRequestClose();
+    if (wasUpdated) onRequestClose();
   };
 
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
-      contentLabel="Editar tarefa"
-      style={{
-        overlay: {
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-        },
-        content: {
-          backgroundColor: "var(--darkgray)",
-          border: "none",
-          padding: "0",
-          inset: "40px",
-          maxWidth: "400px",
-          maxHeight: "600px",
-          margin: "auto",
-          borderRadius: "20px",
-        },
-      }}
+      contentLabel="Editar task"
+      overlayClassName={styles.overlay}
+      className={styles.modal}
     >
-      <div className={styles.container}>
-        <form onSubmit={handleSubmit}>
-          <label>Tarefa:</label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.header}>
+          <span>Editar task</span>
+          <h2>{task.title}</h2>
+        </div>
 
-          <label>Custo:</label>
-          <input
-            type="number"
-            value={cost}
-            onChange={(e) => setCost(e.target.value)}
-            required
-          />
+        <label htmlFor="edit-task-title">Task</label>
+        <input
+          id="edit-task-title"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          required
+        />
 
-          <label>Data limite:</label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-          />
-          <div className={styles.buttons}>
-            <Button name="ATUALIZAR" type="submit" />
-            <Button name="CANCELAR" type="cancel" onClick={onRequestClose} />
-          </div>
-        </form>
-      </div>
+        <label htmlFor="edit-task-cost">Custo (R$)</label>
+        <input
+          id="edit-task-cost"
+          type="number"
+          step="0.01"
+          min="0"
+          value={cost}
+          onChange={(event) => setCost(event.target.value)}
+          required
+        />
+
+        <label htmlFor="edit-task-due-date">Data limite</label>
+        <input
+          id="edit-task-due-date"
+          type="date"
+          value={dueDate}
+          onChange={(event) => setDueDate(event.target.value)}
+          required
+        />
+
+        <div className={styles.buttons}>
+          <Button name="Atualizar" type="submit" />
+          <Button name="Cancelar" type="cancel" onClick={onRequestClose} />
+        </div>
+      </form>
     </Modal>
   );
 };
@@ -96,6 +92,7 @@ EditTaskForm.propTypes = {
   task: PropTypes.shape({
     id: PropTypes.string.isRequired,
     position: PropTypes.number.isRequired,
+    projectId: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     cost: PropTypes.number,
     dueDate: PropTypes.string.isRequired,

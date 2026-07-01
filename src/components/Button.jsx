@@ -2,9 +2,11 @@ import styles from "../styles/Button.module.css";
 import PropTypes from "prop-types";
 
 const Button = ({ name, type, onClick }) => {
+  const variantClass = type === "submit" ? styles.submit : styles.cancel;
+
   return (
     <button
-      className={type === "submit" ? styles.submit : styles.cancel}
+      className={`${styles.button} ${variantClass}`}
       type={type === "submit" ? "submit" : "button"}
       onClick={onClick}
     >
