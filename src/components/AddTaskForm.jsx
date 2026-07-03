@@ -33,11 +33,11 @@ const AddTaskForm = ({ isOpen, onRequestClose, addTask, project }) => {
     event.preventDefault();
     if (!project) return;
 
-    const floatCost = Math.round(parseFloat(cost) * 100) / 100;
+    const parsedCost = cost === "" ? null : Math.round(parseFloat(cost) * 100) / 100;
     const wasCreated = await addTask({
       title: title.trim(),
-      cost: floatCost,
-      dueDate,
+      cost: parsedCost,
+      dueDate: dueDate || "",
       projectId: project.id,
     });
 
@@ -73,7 +73,6 @@ const AddTaskForm = ({ isOpen, onRequestClose, addTask, project }) => {
           type="text"
           value={cost}
           onChange={handleCostChange}
-          required
           placeholder="Digite apenas o valor"
         />
 
@@ -83,7 +82,6 @@ const AddTaskForm = ({ isOpen, onRequestClose, addTask, project }) => {
           type="date"
           value={dueDate}
           onChange={(event) => setDueDate(event.target.value)}
-          required
         />
 
         <div className={styles.buttons}>

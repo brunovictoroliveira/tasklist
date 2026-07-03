@@ -3,6 +3,7 @@ import styles from "./App.module.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
 import api from "./api/api";
+import demoData from "../db.json";
 
 import Header from "./components/Header";
 import TaskList from "./components/TaskList";
@@ -25,6 +26,13 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const isHostedPreview = !["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+        if (isHostedPreview) {
+          setProjects(sortByPosition(demoData.projects));
+          setTasks(sortByPosition(demoData.tasks));
+          return;
+        }
         const [projectsResponse, tasksResponse] = await Promise.all([
           api.get("/projects"),
           api.get("/tasks"),
@@ -34,6 +42,8 @@ function App() {
         setTasks(sortByPosition(tasksResponse.data));
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
+        setProjects(sortByPosition(demoData.projects));
+        setTasks(sortByPosition(demoData.tasks));
       } finally {
         setIsLoading(false);
       }

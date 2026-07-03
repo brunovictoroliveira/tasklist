@@ -1,20 +1,29 @@
 .item {
   position: relative;
+  flex: 1 1 0;
+  min-height: 0;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.8rem;
-  padding: 0.9rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem;
+  padding: clamp(0.48rem, 0.75vw, 0.62rem);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  cursor: grab;
+  touch-action: none;
+}
+
+.item:active {
+  cursor: grabbing;
 }
 
 .item::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 3px;
+  width: 2px;
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);
   background: var(--project-color, var(--cyan));
 }
@@ -32,86 +41,70 @@
   z-index: 5;
 }
 
-.dragHandle {
-  width: 30px;
-  height: 48px;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 4px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.04);
-  cursor: grab;
-}
-
-.dragHandle:active {
-  cursor: grabbing;
-}
-
-.dragHandle span {
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--muted);
-}
 
 .content {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.4rem;
 }
 
 .topLine {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.7rem;
+  gap: 0.35rem;
 }
 
 .topLine h3 {
   margin: 0;
   min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
   color: var(--text);
-  font-size: 1rem;
+  font-size: clamp(0.86rem, 0.95vw, 0.94rem);
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.12;
   overflow-wrap: anywhere;
 }
 
 .taskId {
   flex: 0 0 auto;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
 }
 
 .details {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.35rem;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.72rem;
 }
 
 .details span {
   max-width: 100%;
-  padding: 0.25rem 0.45rem;
+  padding: 0.14rem 0.32rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   overflow-wrap: anywhere;
 }
 
 .buttons {
-  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: repeat(2, 26px);
+  justify-content: end;
   gap: 0.45rem;
 }
 
 .iconButton,
 .orderButton {
-  min-height: 34px;
+  width: 26px;
+  min-height: 26px;
+  display: grid;
+  place-items: center;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
@@ -122,7 +115,13 @@
   border: 1px solid var(--line-strong);
   background: transparent;
   color: var(--text);
-  padding: 0 0.65rem;
+  padding: 0;
+}
+
+.iconButton img {
+  width: 13px;
+  height: 13px;
+  display: block;
 }
 
 .iconButton:hover {
@@ -136,7 +135,6 @@
 }
 
 .orderButton {
-  width: 34px;
   border: 1px solid var(--line-strong);
   background: rgba(255, 255, 255, 0.04);
   color: var(--muted);
@@ -149,23 +147,14 @@
 
 @media (max-width: 380px) {
   .buttons {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .orderButton {
-    width: 100%;
+    grid-template-columns: repeat(2, 26px);
   }
 }
 
 @media (max-width: 360px) {
   .item {
-    gap: 0.6rem;
-    padding: 0.7rem;
-  }
-
-  .dragHandle {
-    width: 28px;
-    height: 44px;
+    gap: 0.4rem;
+    padding: 0.55rem;
   }
 
   .content {
@@ -195,7 +184,7 @@
 
   .iconButton,
   .orderButton {
-    min-height: 32px;
+    min-height: 26px;
     font-size: 0.85rem;
   }
 }

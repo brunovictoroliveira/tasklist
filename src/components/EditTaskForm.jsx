@@ -10,25 +10,26 @@ Modal.setAppElement("#root");
 
 const EditTaskForm = ({ isOpen, onRequestClose, updateTask, task }) => {
   const [title, setTitle] = useState(task?.title || "");
-  const [cost, setCost] = useState(task?.cost || 0);
+  const [cost, setCost] = useState(task?.cost ?? "");
   const [dueDate, setDueDate] = useState(task?.dueDate || "");
 
   useEffect(() => {
     if (task) {
       setTitle(task.title);
-      setCost(task.cost);
-      setDueDate(task.dueDate);
+      setCost(task.cost ?? "");
+      setDueDate(task.dueDate ?? "");
     }
   }, [task]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const parsedCost = cost === "" ? null : Math.round(parseFloat(cost) * 100) / 100;
     const wasUpdated = await updateTask({
       ...task,
       title: title.trim(),
-      cost: Math.round(parseFloat(cost) * 100) / 100,
-      dueDate,
+      cost: parsedCost,
+      dueDate: dueDate || "",
     });
 
     if (wasUpdated) onRequestClose();
@@ -64,7 +65,6 @@ const EditTaskForm = ({ isOpen, onRequestClose, updateTask, task }) => {
           min="0"
           value={cost}
           onChange={(event) => setCost(event.target.value)}
-          required
         />
 
         <label htmlFor="edit-task-due-date">Data limite</label>
@@ -73,7 +73,6 @@ const EditTaskForm = ({ isOpen, onRequestClose, updateTask, task }) => {
           type="date"
           value={dueDate}
           onChange={(event) => setDueDate(event.target.value)}
-          required
         />
 
         <div className={styles.buttons}>
@@ -95,7 +94,7 @@ EditTaskForm.propTypes = {
     projectId: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     cost: PropTypes.number,
-    dueDate: PropTypes.string.isRequired,
+    dueDate: PropTypes.string,
   }).isRequired,
 };
 

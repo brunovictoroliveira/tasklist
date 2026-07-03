@@ -1,26 +1,12 @@
 .board {
-  width: min(100%, 1180px);
+  width: min(100%, 1440px);
   margin: 0 auto;
   display: grid;
-  grid-auto-columns: minmax(300px, 360px);
-  grid-auto-flow: column;
-  align-items: start;
-  gap: 1rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-inline: contain;
-  padding: 0.25rem 0 1.25rem;
-  scroll-padding-inline: 0.5rem;
-  scroll-snap-type: x proximity;
-}
-
-.board::-webkit-scrollbar {
-  height: 10px;
-}
-
-.board::-webkit-scrollbar-thumb {
-  background: var(--line-strong);
-  border-radius: 999px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(1rem, 1.6vw, 1.35rem);
+  overflow: visible;
+  padding: 0.25rem 0 0.5rem;
 }
 
 .emptyState {
@@ -34,33 +20,25 @@
   background: var(--surface);
 }
 
-@media (min-width: 1180px) {
+@media (max-width: 1180px) {
   .board {
-    grid-auto-columns: minmax(320px, 370px);
+    width: min(100%, 920px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 680px) {
   .board {
-    grid-auto-columns: minmax(300px, 44vw);
-  }
-}
-
-@media (max-width: 760px) {
-  .board {
-    width: calc(100vw - 1.7rem);
-    grid-auto-columns: minmax(282px, 86vw);
-    margin-left: auto;
-    margin-right: auto;
+    width: min(100%, 520px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.85rem;
+    padding-bottom: 0.25rem;
   }
 }
 
 @media (max-width: 360px) {
   .board {
-    width: calc(100vw - 1.1rem);
-    grid-auto-columns: minmax(272px, calc(100vw - 1.1rem));
     gap: 0.7rem;
-    padding-bottom: 0.9rem;
   }
 
   .emptyState {
