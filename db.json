@@ -1,139 +1,34 @@
 {
   "projects": [
     {
-      "id": "2",
-      "name": "Agenda App",
+      "id": "1",
+      "name": "Customy App",
       "color": "#00e5ff",
-      "position": 2
+      "position": 1,
+      "taskCount": 4
     },
     {
-      "id": "3",
-      "name": "Artimus",
-      "color": "#4cff9b",
-      "position": 3
-    },
-    {
-      "id": "4",
-      "name": "Canal YouTube Tech",
-      "color": "#ff006e",
-      "position": 4
-    },
-    {
-      "id": "5",
-      "name": "podcast",
-      "color": "#c150ff",
-      "position": 5
-    },
-    {
-      "id": "6",
-      "name": "teste de grid",
+      "id": "2",
+      "name": "teste",
       "color": "#ff7f5c",
-      "position": 6
+      "position": 2
     }
   ],
   "tasks": [
     {
       "id": "1",
-      "title": "troca de tema de layout",
-      "cost": 0,
-      "dueDate": "2026-07-01",
-      "projectId": "2",
+      "title": "Validar todas as funcionalidades básicas",
+      "cost": null,
+      "dueDate": "",
+      "projectId": "1",
       "position": 1
     },
     {
       "id": "2",
-      "title": "executar a interface",
-      "cost": 0,
-      "dueDate": "2026-07-02",
-      "projectId": "3",
-      "position": 1
-    },
-    {
-      "id": "3",
-      "title": "teste",
+      "title": "Pensar na UI da agenda",
       "cost": null,
       "dueDate": "",
-      "projectId": "2",
-      "position": 2
-    },
-    {
-      "id": "4",
-      "title": "teste2",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "2",
-      "position": 3
-    },
-    {
-      "id": "5",
-      "title": "tarefaaaa",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "3",
-      "position": 2
-    },
-    {
-      "id": "6",
-      "title": "refafgsdg",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "3",
-      "position": 3
-    },
-    {
-      "id": "7",
-      "title": "gdfgdfg",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "4",
-      "position": 1
-    },
-    {
-      "id": "8",
-      "title": "gdfgdfgd",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "5",
-      "position": 1
-    },
-    {
-      "id": "9",
-      "title": "asfsdfgsd",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "5",
-      "position": 2
-    },
-    {
-      "id": "10",
-      "title": "fsdfsdf",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "5",
-      "position": 3
-    },
-    {
-      "id": "11",
-      "title": "sdfsdfsdf",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "4",
-      "position": 2
-    },
-    {
-      "id": "12",
-      "title": "sdfsdfsdf",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "6",
-      "position": 1
-    },
-    {
-      "id": "13",
-      "title": "fsdfsdfsdf",
-      "cost": null,
-      "dueDate": "",
-      "projectId": "6",
+      "projectId": "1",
       "position": 2
     }
   ]

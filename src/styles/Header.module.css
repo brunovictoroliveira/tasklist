@@ -4,31 +4,16 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  justify-content: flex-start;
   padding-top: 0.5rem;
 }
 
-.logo {
-  flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--green);
-  border-radius: var(--radius-sm);
-  color: var(--green);
-  font-weight: 700;
-  box-shadow: 0 0 24px rgba(76, 255, 155, 0.12);
-}
-
-.header div:last-child {
+.brand {
   min-width: 0;
-}
-
-.header p {
-  margin: 0 0 0.25rem;
-  color: var(--cyan);
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.7rem;
 }
 
 .header h1 {
@@ -43,18 +28,11 @@
 
 @media (max-width: 360px) {
   .header {
-    gap: 0.65rem;
     padding-top: 0.35rem;
   }
 
-  .logo {
-    width: 44px;
-    height: 44px;
-    font-size: 0.9rem;
-  }
-
-  .header p {
-    font-size: 0.74rem;
+  .brand {
+    gap: 0.55rem;
   }
 
   .header h1 {

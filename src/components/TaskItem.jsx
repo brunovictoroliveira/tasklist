@@ -17,7 +17,7 @@ const formatCurrency = (value = 0) =>
 
 const formatDate = (dateString) => {
   const [year, month, day] = dateString.split("-");
-  return `${day}/${month}/${year}`;
+  return day + "/" + month + "/" + year;
 };
 
 const TaskItem = ({ task, onEdit, onDelete, onMoveUp, onMoveDown }) => {
@@ -28,7 +28,6 @@ const TaskItem = ({ task, onEdit, onDelete, onMoveUp, onMoveDown }) => {
   const isHighCost = hasCost && taskCost >= 1000;
 
   const {
-    attributes,
     listeners,
     setNodeRef,
     transform,
@@ -46,18 +45,18 @@ const TaskItem = ({ task, onEdit, onDelete, onMoveUp, onMoveDown }) => {
     setIsDeleteModalOpen(false);
   };
 
+  const stopDragStart = (event) => {
+    event.stopPropagation();
+  };
+
   return (
     <article
       ref={setNodeRef}
-      className={`${styles.item} ${isHighCost ? styles.highCost : ""} ${
-        isDragging ? styles.dragging : ""
-      }`}
+      className={styles.item + (isHighCost ? " " + styles.highCost : "") + (isDragging ? " " + styles.dragging : "")}
       style={itemStyle}
-      aria-label={`Reordenar ${task.title}`}
-      {...attributes}
+      aria-label={"Reordenar " + task.title}
       {...listeners}
     >
-
       <div className={styles.content}>
         <div className={styles.topLine}>
           <h3>{task.title}</h3>
@@ -71,12 +70,12 @@ const TaskItem = ({ task, onEdit, onDelete, onMoveUp, onMoveDown }) => {
         )}
       </div>
 
-      <div className={styles.buttons} aria-label="Ações da task">
+      <div className={styles.buttons} aria-label="Ações da task" onPointerDown={stopDragStart}>
         <button className={styles.iconButton} type="button" onClick={onEdit} aria-label="Editar task" title="Editar">
           <img src={editIcon} alt="" aria-hidden="true" />
         </button>
         <button
-          className={`${styles.iconButton} ${styles.dangerButton}`}
+          className={styles.iconButton + " " + styles.dangerButton}
           type="button"
           onClick={() => setIsDeleteModalOpen(true)}
           aria-label="Excluir task"

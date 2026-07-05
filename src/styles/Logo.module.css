@@ -1,0 +1,7 @@
+.logo {
+  flex: 0 0 auto;
+  width: clamp(44px, 8vw, 58px);
+  height: clamp(44px, 8vw, 58px);
+  display: block;
+  object-fit: contain;
+}

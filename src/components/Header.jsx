@@ -1,14 +1,12 @@
 import styles from "../styles/Header.module.css";
+import Logo from "./Logo";
 
 const Header = () => {
   return (
     <header className={styles.header}>
-      <div className={styles.logo} aria-hidden="true">
-        TL
-      </div>
-      <div>
-        <p>TaskList</p>
-        <h1>Board de projetos</h1>
+      <div className={styles.brand}>
+        <Logo />
+        <h1>Projetos</h1>
       </div>
     </header>
   );

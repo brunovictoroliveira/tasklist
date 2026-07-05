@@ -1,6 +1,6 @@
 import styles from "../styles/ProjectForm.module.css";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import PropTypes from "prop-types";
 
@@ -10,9 +10,17 @@ Modal.setAppElement("#root");
 
 const colorOptions = ["#00e5ff", "#4cff9b", "#ff7f5c", "#ff006e", "#c150ff"];
 
-const ProjectForm = ({ isOpen, onRequestClose, addProject }) => {
+const ProjectForm = ({ isOpen, onRequestClose, addProject, updateProject, project = null }) => {
   const [name, setName] = useState("");
   const [color, setColor] = useState(colorOptions[0]);
+  const isEditing = Boolean(project);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setName(project?.name ?? "");
+    setColor(project?.color ?? colorOptions[0]);
+  }, [isOpen, project]);
 
   const resetForm = () => {
     setName("");
@@ -27,8 +35,12 @@ const ProjectForm = ({ isOpen, onRequestClose, addProject }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const wasCreated = await addProject({ name: name.trim(), color });
-    if (!wasCreated) return;
+    const projectData = { name: name.trim(), color };
+    const wasSaved = isEditing
+      ? await updateProject({ ...project, ...projectData })
+      : await addProject(projectData);
+
+    if (!wasSaved) return;
 
     handleClose();
   };
@@ -37,14 +49,14 @@ const ProjectForm = ({ isOpen, onRequestClose, addProject }) => {
     <Modal
       isOpen={isOpen}
       onRequestClose={handleClose}
-      contentLabel="Criar projeto"
+      contentLabel={isEditing ? "Editar projeto" : "Criar projeto"}
       overlayClassName={styles.overlay}
       className={styles.modal}
     >
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.header}>
-          <span>Novo projeto</span>
-          <h2>Crie uma coluna</h2>
+          <span>{isEditing ? "Editar projeto" : "Novo projeto"}</span>
+          <h2>{isEditing ? project.name : "Crie uma coluna"}</h2>
         </div>
 
         <label htmlFor="project-name">Nome do projeto</label>
@@ -73,7 +85,7 @@ const ProjectForm = ({ isOpen, onRequestClose, addProject }) => {
         </fieldset>
 
         <div className={styles.buttons}>
-          <Button name="Criar projeto" type="submit" />
+          <Button name={isEditing ? "Atualizar projeto" : "Criar projeto"} type="submit" />
           <Button name="Cancelar" type="cancel" onClick={handleClose} />
         </div>
       </form>
@@ -85,6 +97,14 @@ ProjectForm.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onRequestClose: PropTypes.func.isRequired,
   addProject: PropTypes.func.isRequired,
+  updateProject: PropTypes.func.isRequired,
+  project: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired,
+    position: PropTypes.number.isRequired,
+  }),
 };
+
 
 export default ProjectForm;

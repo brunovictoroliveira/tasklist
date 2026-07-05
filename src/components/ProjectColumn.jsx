@@ -1,11 +1,13 @@
 import styles from "../styles/ProjectColumn.module.css";
 
+import { useState } from "react";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import PropTypes from "prop-types";
 
+import DeleteConfirmation from "./DeleteConfirmation";
 import TaskItem from "./TaskItem";
-
-const COLLAPSED_TASK_LIMIT = 3;
+import deleteIcon from "../icons/delete.svg";
+import editIcon from "../icons/edit.svg";
 
 const ProjectColumn = ({
   project,
@@ -13,40 +15,86 @@ const ProjectColumn = ({
   isExpanded,
   onToggle,
   onAddTask,
+  onDeleteProject,
+  onEditProject,
   onEditTask,
   onDeleteTask,
   onMoveTaskUp,
   onMoveTaskDown,
 }) => {
-  const visibleTasks = isExpanded ? tasks : tasks.slice(0, COLLAPSED_TASK_LIMIT);
-  const hiddenTaskCount = Math.max(tasks.length - COLLAPSED_TASK_LIMIT, 0);
-  const shouldShowToggle = tasks.length > COLLAPSED_TASK_LIMIT;
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const hasTasks = tasks.length > 0;
+  const taskLabel = tasks.length === 1 ? "task vinculada" : "tasks vinculadas";
+  const deleteMessage = hasTasks
+    ? "Isto removerá o projeto e " + tasks.length + " " + taskLabel + ". Esta ação não pode ser desfeita."
+    : "Isto removerá o projeto vazio. Esta ação não pode ser desfeita.";
+
+  const confirmDeleteProject = () => {
+    onDeleteProject(project.id);
+    setIsDeleteModalOpen(false);
+  };
 
   return (
-    <article className={styles.column} style={{ "--project-color": project.color }}>
+    <article
+      className={styles.column + (!isExpanded ? " " + styles.collapsed : "")}
+      style={{ "--project-color": project.color }}
+    >
       <header className={styles.header}>
         <div>
           <span className={styles.projectLabel}>Projeto</span>
           <h2>{project.name}</h2>
         </div>
-        <span className={styles.count}>{project.taskCount}</span>
+        <div className={styles.headerActions}>
+          <span className={styles.count}>{project.taskCount}</span>
+          <button
+            className={styles.editButton}
+            type="button"
+            onClick={onEditProject}
+            aria-label={"Editar projeto " + project.name}
+            title="Editar projeto"
+          >
+            <img src={editIcon} alt="" aria-hidden="true" />
+          </button>
+          <button
+            className={styles.deleteButton}
+            type="button"
+            onClick={() => setIsDeleteModalOpen(true)}
+            aria-label={"Excluir projeto " + project.name}
+            title="Excluir projeto"
+          >
+            <img src={deleteIcon} alt="" aria-hidden="true" />
+          </button>
+        </div>
       </header>
+
+      {!isExpanded && (
+        <div className={styles.summary} aria-label={hasTasks ? tasks.length + " tasks recolhidas" : "Projeto sem tasks"}>
+          <span className={styles.statusDot} />
+          <span>{hasTasks ? tasks.length + " " + taskLabel : "Sem tasks"}</span>
+        </div>
+      )}
 
       <div className={styles.actions}>
         <button className={styles.addButton} type="button" onClick={onAddTask}>
           + Task
         </button>
-        {shouldShowToggle && (
-          <button className={styles.toggleButton} type="button" onClick={onToggle}>
-            {isExpanded ? "Recolher" : `Expandir +${hiddenTaskCount}`}
+        {hasTasks && (
+          <button
+            className={styles.toggleButton}
+            type="button"
+            onClick={onToggle}
+            aria-label={isExpanded ? "Recolher tasks" : "Expandir tasks"}
+            title={isExpanded ? "Recolher tasks" : "Expandir tasks"}
+          >
+            {isExpanded ? "↑" : "↓"}
           </button>
         )}
       </div>
 
-      <SortableContext items={visibleTasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
-        <div className={styles.stack}>
-          {visibleTasks.length > 0 ? (
-            visibleTasks.map((task) => (
+      {isExpanded && (
+        <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+          <div className={styles.stack}>
+            {tasks.map((task) => (
               <TaskItem
                 key={task.id}
                 task={task}
@@ -55,12 +103,21 @@ const ProjectColumn = ({
                 onMoveUp={() => onMoveTaskUp(task.id)}
                 onMoveDown={() => onMoveTaskDown(task.id)}
               />
-            ))
-          ) : (
-            <p className={styles.empty}>Nenhuma task neste projeto.</p>
-          )}
-        </div>
-      </SortableContext>
+            ))}
+          </div>
+        </SortableContext>
+      )}
+
+      {isExpanded && !hasTasks && <p className={styles.empty}>Nenhuma task neste projeto.</p>}
+
+      <DeleteConfirmation
+        isOpen={isDeleteModalOpen}
+        onRequestClose={() => setIsDeleteModalOpen(false)}
+        onDelete={confirmDeleteProject}
+        eyebrow="Excluir projeto"
+        title={"Excluir " + project.name + "?"}
+        message={deleteMessage}
+      />
     </article>
   );
 };
@@ -86,6 +143,8 @@ ProjectColumn.propTypes = {
   isExpanded: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   onAddTask: PropTypes.func.isRequired,
+  onDeleteProject: PropTypes.func.isRequired,
+  onEditProject: PropTypes.func.isRequired,
   onEditTask: PropTypes.func.isRequired,
   onDeleteTask: PropTypes.func.isRequired,
   onMoveTaskUp: PropTypes.func.isRequired,

@@ -29,6 +29,8 @@ const TaskList = ({
   addTask,
   updateTask,
   deleteTask,
+  deleteProject,
+  editProject,
   moveTaskUp,
   moveTaskDown,
   reorderTasks,
@@ -94,6 +96,8 @@ const TaskList = ({
                 isExpanded={Boolean(expandedProjects[project.id])}
                 onToggle={() => toggleProject(project.id)}
                 onAddTask={() => openAddTaskModal(project)}
+                onDeleteProject={deleteProject}
+                onEditProject={() => editProject(project)}
                 onEditTask={setTaskToEdit}
                 onDeleteTask={deleteTask}
                 onMoveTaskUp={(taskId) => moveTaskUp(project.id, taskId)}
@@ -148,6 +152,8 @@ TaskList.propTypes = {
   addTask: PropTypes.func.isRequired,
   updateTask: PropTypes.func.isRequired,
   deleteTask: PropTypes.func.isRequired,
+  deleteProject: PropTypes.func.isRequired,
+  editProject: PropTypes.func.isRequired,
   moveTaskUp: PropTypes.func.isRequired,
   moveTaskDown: PropTypes.func.isRequired,
   reorderTasks: PropTypes.func.isRequired,

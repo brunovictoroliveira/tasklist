@@ -7,7 +7,14 @@ import Button from "./Button";
 
 Modal.setAppElement("#root");
 
-const DeleteConfirmation = ({ isOpen, onRequestClose, onDelete }) => {
+const DeleteConfirmation = ({
+  isOpen,
+  onRequestClose,
+  onDelete,
+  eyebrow = "Excluir task",
+  title = "Confirma a exclusão?",
+  message = "Esta ação não pode ser desfeita.",
+}) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -17,9 +24,9 @@ const DeleteConfirmation = ({ isOpen, onRequestClose, onDelete }) => {
       className={styles.modal}
     >
       <div className={styles.container}>
-        <span>Excluir task</span>
-        <h2>Confirma a exclusão?</h2>
-        <p>Esta ação não pode ser desfeita.</p>
+        <span>{eyebrow}</span>
+        <h2>{title}</h2>
+        <p>{message}</p>
         <div className={styles.buttons}>
           <Button name="Confirmar" type="submit" onClick={onDelete} />
           <Button name="Cancelar" type="cancel" onClick={onRequestClose} />
@@ -33,6 +40,9 @@ DeleteConfirmation.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onRequestClose: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  eyebrow: PropTypes.string,
+  title: PropTypes.string,
+  message: PropTypes.string,
 };
 
 export default DeleteConfirmation;

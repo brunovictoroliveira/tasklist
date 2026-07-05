@@ -21,6 +21,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [expandedProjects, setExpandedProjects] = useState({});
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -105,6 +106,37 @@ function App() {
         return true;
       } catch (error) {
         console.error("Erro ao adicionar projeto:", error);
+        return false;
+      }
+    },
+    [projects]
+  );
+
+  const updateProject = useCallback(
+    async (updatedProject) => {
+      try {
+        const isDuplicate = projects.some(
+          (project) =>
+            project.id !== updatedProject.id &&
+            project.name.toLowerCase() === updatedProject.name.toLowerCase()
+        );
+
+        if (isDuplicate) {
+          alert("Já existe um projeto com este nome.");
+          return false;
+        }
+
+        const response = await api.put(`/projects/${updatedProject.id}`, updatedProject);
+        setProjects((currentProjects) =>
+          sortByPosition(
+            currentProjects.map((project) =>
+              project.id === response.data.id ? response.data : project
+            )
+          )
+        );
+        return true;
+      } catch (error) {
+        console.error("Erro ao atualizar projeto:", error);
         return false;
       }
     },
@@ -210,6 +242,40 @@ function App() {
     [tasks]
   );
 
+  const deleteProject = useCallback(
+    async (projectId) => {
+      try {
+        const projectToDelete = projects.find((project) => project.id === projectId);
+        if (!projectToDelete) return;
+
+        const projectTasks = tasks.filter((task) => task.projectId === projectId);
+        const normalizedProjects = sortByPosition(
+          projects.filter((project) => project.id !== projectId)
+        ).map((project, index) => ({
+          ...project,
+          position: index + 1,
+        }));
+
+        await Promise.all(projectTasks.map((task) => api.delete(`/tasks/${task.id}`)));
+        await api.delete(`/projects/${projectId}`);
+        await Promise.all(
+          normalizedProjects.map((project) => api.put(`/projects/${project.id}`, project))
+        );
+
+        setProjects(normalizedProjects);
+        setTasks((currentTasks) => currentTasks.filter((task) => task.projectId !== projectId));
+        setExpandedProjects((currentState) => {
+          const nextState = { ...currentState };
+          delete nextState[projectId];
+          return nextState;
+        });
+      } catch (error) {
+        console.error("Erro ao excluir projeto:", error);
+      }
+    },
+    [projects, tasks]
+  );
+
   const reorderTasks = useCallback(
     async (projectId, activeTaskId, overTaskId) => {
       if (!overTaskId || activeTaskId === overTaskId) return;
@@ -254,6 +320,21 @@ function App() {
     }));
   };
 
+  const openProjectModal = () => {
+    setProjectToEdit(null);
+    setIsProjectModalOpen(true);
+  };
+
+  const openEditProjectModal = (project) => {
+    setProjectToEdit(project);
+    setIsProjectModalOpen(true);
+  };
+
+  const closeProjectModal = () => {
+    setIsProjectModalOpen(false);
+    setProjectToEdit(null);
+  };
+
   return (
     <main className={styles.container}>
       <Header />
@@ -265,7 +346,7 @@ function App() {
             {projects.length} projetos · {tasks.length} tasks
           </span>
         </div>
-        <Button name="Novo projeto" type="submit" onClick={() => setIsProjectModalOpen(true)} />
+        <Button name="Novo projeto" type="submit" onClick={openProjectModal} />
       </section>
 
       <TaskList
@@ -276,6 +357,8 @@ function App() {
         addTask={addTask}
         updateTask={updateTask}
         deleteTask={deleteTask}
+        deleteProject={deleteProject}
+        editProject={openEditProjectModal}
         moveTaskUp={moveTaskUp}
         moveTaskDown={moveTaskDown}
         reorderTasks={reorderTasks}
@@ -284,8 +367,10 @@ function App() {
 
       <ProjectForm
         isOpen={isProjectModalOpen}
-        onRequestClose={() => setIsProjectModalOpen(false)}
+        onRequestClose={closeProjectModal}
         addProject={addProject}
+        updateProject={updateProject}
+        project={projectToEdit}
       />
     </main>
   );
